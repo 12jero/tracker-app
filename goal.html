@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Reminder App</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyUzYuNDggMjIgMTIgMjIgMjIgMTcuNTIgMjIgMTJDMTcuNTIgMjIgMTIgMTcuNTIgMTIgMTJzNS40OC01LjQ4IDUuNDgtNS40OEMxNy41MiAyIDk2LjQ4IDIgMTIgMnptLTItMTJjLTMuMzcgMC02IDMuNjMtNiA4IDAgNC4zNyAzLjYzIDggNiA4IDQuMzcgMCA4LTMuNjMgOC02IDgtNi42MyA0LjM3LTYgMi0yem0wIDRjLTEuMSAwLTIgMC45LTIgMnMgMC45IDIgMiAydi00eiIgZmlsbD0iIzIxOTZGMyIvPgo8L3N2Zz4K">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        /* Front Page Styles */
+        .front-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .front-page.hidden {
+            display: none;
+        }
+        
+        .front-logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        .front-title {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .front-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+        
+        .front-description {
+            color: rgba(255,255,255,0.8);
+            font-size: 16px;
+            margin-bottom: 40px;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+        
+        .get-started-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            width: 100%;
+            max-width: 250px;
+        }
+        
+        .get-started-btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+        
+        /* Main App Styles */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: none; /* Hidden by default */
+        }
+        
+        .container.visible {
+            display: block;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .header {
+            background: #2196F3;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .task-form {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+        
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #1976D2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+        
+        .task-list {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .task {
+            background: white;
+            margin: 15px 0;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .task:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .task.completed {
+            opacity: 0.6;
+            background: #f8f9fa;
+        }
+        
+        .task.completed .task-text {
+            text-decoration: line-through;
+        }
+        
+        .task.high {
+            border-left-color: #f44336;
+            background: linear-gradient(90deg, #fff, #ffebee);
+        }
+        
+        .task.medium {
+            border-left-color: #ff9800;
+            background: linear-gradient(90deg, #fff, #fff3e0);
+        }
+        
+        .task.low {
+            border-left-color: #4caf50;
+            background: linear-gradient(90deg, #fff, #e8f5e8);
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-text {
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .task-details {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .overdue {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .task-actions button {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        
+        .toggle-btn {
+            background: #4caf50;
+        }
+        
+        .toggle-btn:hover {
+            background: #388e3c;
+        }
+        
+        .delete-btn {
+            background: #f44336;
+        }
+        
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .front-page {
+                padding: 10px;
+            }
+            
+            .front-title {
+                font-size: 28px;
+            }
+            
+            .front-subtitle {
+                font-size: 16px;
+            }
+            
+            .task {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .task-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .task-actions button {
+                flex: 1;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .task {
+            animation: slideIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Front Page -->
+    <div class="front-page" id="frontPage">
+        <div class="front-logo">📝</div>
+        <h1 class="front-title">Task Reminder</h1>
+        <p class="front-subtitle">Stay organized and never miss a deadline</p>
+        <p class="front-description">
+            Add tasks, set priorities, track due dates, and get reminders—all in one simple app that works offline on your device.
+        </p>
+        <button class="get-started-btn" onclick="enterApp()">Get Started</button>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="container" id="mainApp">
+        <div class="header">
+            <button class="back-btn" onclick="goBackToFrontPage()">←</button>
+            <h1>📝 Task Reminder</h1>
+            <p>Never forget your important tasks</p>
+        </div>
+        
+        <div class="task-form">
+            <form id="taskForm">
+                <div class="form-group">
+                    <label for="taskInput">Task Description</label>
+                    <input type="text" id="taskInput" placeholder="What do you need to do?" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dueDate">Due Date (Optional)</label>
+                    <input type="date" id="dueDate">
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+                    <select id="priority">
+                        <option value="low">⭐ Low Priority</option>
+                        <option value="medium">⭐⭐ Medium Priority</option>
+                        <option value="high">⭐⭐⭐ High Priority</option>
+                    </select>
+                </div>
+                
+                <button type="submit">➕ Add Task</button>
+            </form>
+        </div>
+        
+        <div class="task-list" id="taskList">
+            <!-- Tasks will be displayed here -->
+        </div>
+        
+        <div class="stats" id="stats">
+            <span>Total: <span id="totalCount">0</span></span>
+            <span>Completed: <span id="completedCount">0</span></span>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const frontPage = document.getElementById('frontPage');
+        const mainApp = document.getElementById('mainApp');
+        const taskForm = document.getElementById('taskForm');
+        const taskInput = document.getElementById('taskInput');
+        const dueDateInput = document.getElementById('dueDate');
+        const priority = document.getElementById('priority');
+        const taskList = document.getElementById('taskList');
+        const totalCount = document.getElementById('totalCount');
+        const completedCount = document.getElementById('completedCount');
+
+        // Set today's date as default for due date
+        dueDateInput.valueAsDate = new Date();
+
+        // Load tasks from localStorage and ensure each has a unique ID
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        // Assign IDs to existing tasks if missing
+        tasks = tasks.map((task, index) => ({
+            ...task,
+            id: task.id || Date.now() + index // Unique ID
+        }));
+
+        // Function to enter the main app (this is what the button calls)
+        function enterApp() {
+            frontPage.classList.add('hidden');
+            mainApp.classList.add('visible');
+            renderTasks();
+            updateStats();
+        }
+
+        // Function to go back to the front page
+        function goBackToFrontPage() {
+            mainApp.classList.remove('visible');
+            frontPage.classList.remove('hidden');
+        }
+
+        // Function to save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateStats();
+            renderTasks(); // Refresh UI immediately
+        }
+
+        // Function to update statistics
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(task => task.completed).length;
+            totalCount.textContent = total;
+            completedCount.textContent = completed;
+        }
+
+        // Function to render tasks
+        function renderTasks() {
+            taskList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <p>🎉 No tasks yet! Add your first task above.</p>
+                    </div>`;
+                return;
+            }
+            
+            tasks.forEach(task => {
+                const isOverdue = task.dueDate && !task.completed && new Date(task.dueDate) < new Date();
+                const taskElement = document.createElement('div');
+                taskElement.className = `task ${task.priority} ${task.completed ? 'completed' : ''}`;
+                taskElement.innerHTML = `
+                    <div class="task-content">
+                        <div class="task-text">${task.text}</div>
+                        <div class="task-details">
+                            ${task.dueDate ? `Due: ${new Date(task.dueDate).toLocaleDateString()}` : 'No due date'}
+                            ${isOverdue ? ' <span class="overdue">(Overdue! ⏰)</span>' : ''}
+                            <br>Priority: ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="toggle-btn" onclick="toggleTask(${task.id})">
+                            ${task.completed ? 'Undo' : 'Complete'}
+                        </button>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+                    </div>
+                `;
+                taskList.appendChild(taskElement);
+            });
+        }
+
+        // Function to add a new task
+        function addTask(text, dueDate, priority) {
+            const newTask = {
+                id: Date.now(),
+                text: text,
+                dueDate: dueDate || null,
+                priority: priority,
+                completed: false
+            };
+            tasks.unshift(newTask); // Add to beginning for newest first
+            saveTasks();
+            taskInput.value = '';
+            dueDateInput.valueAsDate = new Date(); // Reset due date to today
+        }
+
+        // Function to toggle task completion
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveTasks();
+            }
+        }
+
+        // Function to delete a task
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+        }
+
+        // Event listener for form submission
+        taskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const text = taskInput.value.trim();
+            const dueDate = dueDateInput.value;
+            const priorityValue = priority.value;
+            if (text) {
+                addTask(text, dueDate, priorityValue);
+            }
+          });
+
+        // Register service worker
+        if ("serviceWorker" in navigator){
+            window.addEventListener("load",() => {
+                navigator.serviceWorker
+                .register("service-worker.js") // 👈 keep it like this if index.html and service-worker.js are in same folder
+      .then(reg => console.log("Service Worker registered:", reg))
+      .catch(err => console.log("Service Worker registration failed:", err));
+  });
+}
+
+    </script>
+    
